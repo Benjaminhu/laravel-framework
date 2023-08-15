@@ -225,12 +225,8 @@ class ContextualBindingTest extends TestCase
             $resolvedInstance->implOne
         );
         $this->assertNull($resolvedInstance->implOne->inner);
-
-        $this->assertInstanceOf(
-            ContainerTestContextInjectTwo::class,
-            $resolvedInstance->implTwo
-        );
-        $this->assertInstanceOf(ContainerContextImplementationStubTwo::class, $resolvedInstance->implTwo->impl);
+        $this->assertNull($resolvedInstance->implOne->optional);
+        $this->assertNull($resolvedInstance->implTwo);
     }
 
     public function testContextualBindingWorksForVariadicDependencies()
@@ -259,6 +255,15 @@ class ContextualBindingTest extends TestCase
 
         $this->assertCount(0, $resolvedInstance->stubs);
     }
+
+	public function testContextualBindingWorksForVariadicWithoutTypeHintDependenciesWithNothingBound()
+	{
+		$container = new Container;
+
+		$resolvedInstance = $container->make(ContainerTestContextInjectVariadicWithoutTypeHint::class);
+
+		$this->assertCount(0, $resolvedInstance->stubs);
+	}
 
     public function testContextualBindingWorksForVariadicAfterNonVariadicDependencies()
     {
@@ -548,7 +553,7 @@ class ContainerTestContextInjectTwoInstances
     public $implOne;
     public $implTwo;
 
-    public function __construct(ContainerTestContextWithOptionalInnerDependency $implOne, ContainerTestContextInjectTwo $implTwo)
+    public function __construct(ContainerTestContextWithOptionalInnerDependency $implOne, ContainerTestContextInjectTwo $implTwo = null)
     {
         $this->implOne = $implOne;
         $this->implTwo = $implTwo;
@@ -558,10 +563,12 @@ class ContainerTestContextInjectTwoInstances
 class ContainerTestContextWithOptionalInnerDependency
 {
     public $inner;
+    public $optional;
 
-    public function __construct(ContainerTestContextInjectOne $inner = null)
+    public function __construct(ContainerTestContextInjectOne $inner = null, ContainerTestContextInjectVariadicWithoutTypeHintExtend $optional = null)
     {
         $this->inner = $inner;
+        $this->optional = $optional;
     }
 }
 
@@ -583,6 +590,20 @@ class ContainerTestContextInjectVariadic
     {
         $this->stubs = $stubs;
     }
+}
+
+class ContainerTestContextInjectVariadicWithoutTypeHint
+{
+	public $stubs;
+
+	public function __construct(...$stubs)
+	{
+		$this->stubs = $stubs;
+	}
+}
+
+class ContainerTestContextInjectVariadicWithoutTypeHintExtend extends ContainerTestContextInjectVariadicWithoutTypeHint
+{
 }
 
 class ContainerTestContextInjectVariadicAfterNonVariadic
