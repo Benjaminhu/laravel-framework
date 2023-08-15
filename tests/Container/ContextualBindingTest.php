@@ -260,6 +260,15 @@ class ContextualBindingTest extends TestCase
         $this->assertCount(0, $resolvedInstance->stubs);
     }
 
+    public function testContextualBindingWorksForVariadicWithoutTypeHintDependenciesWithNothingBound()
+    {
+        $container = new Container;
+
+        $resolvedInstance = $container->make(ContainerTestContextInjectVariadicWithoutTypeHint::class);
+
+        $this->assertCount(0, $resolvedInstance->stubs);
+    }
+
     public function testContextualBindingWorksForVariadicAfterNonVariadicDependencies()
     {
         $container = new Container;
@@ -580,6 +589,16 @@ class ContainerTestContextInjectVariadic
     public $stubs;
 
     public function __construct(IContainerContextContractStub ...$stubs)
+    {
+        $this->stubs = $stubs;
+    }
+}
+
+class ContainerTestContextInjectVariadicWithoutTypeHint
+{
+    public $stubs;
+
+    public function __construct(...$stubs)
     {
         $this->stubs = $stubs;
     }
